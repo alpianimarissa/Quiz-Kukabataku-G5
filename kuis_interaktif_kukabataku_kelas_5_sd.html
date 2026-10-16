@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif KUKABATAKU Kelas 5 SD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        .nav-btn-active {
+            ring: 2px;
+            ring-color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen pb-12">
+
+    <!-- Header / Navbar -->
+    <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div>
+                <span class="bg-indigo-800 text-indigo-200 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Kelas 5 SD</span>
+                <h1 class="text-xl md:text-2xl font-extrabold tracking-tight mt-1">Kuis Utama KUKABATAKU</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="bg-indigo-700 px-4 py-2 rounded-xl text-center border border-indigo-500">
+                    <span class="text-xs text-indigo-200 block font-medium">Progres Menjawab</span>
+                    <span id="progress-text" class="font-bold text-lg text-white">0 / 30</span>
+                </div>
+                <button onclick="resetQuizConfirm()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-sm">
+                    Reset Ulang
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- Panel Utama Soal (Lebar 3 Kolom) -->
+        <section class="lg:col-span-3 space-y-6">
+
+            <!-- Card Soal -->
+            <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                    <span id="question-badge" class="bg-indigo-100 text-indigo-700 font-extrabold text-sm px-3.5 py-1 rounded-full">
+                        Soal Nomor 1
+                    </span>
+                    <span id="status-badge" class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-md">
+                        Belum Dijawab
+                    </span>
+                </div>
+
+                <!-- Teks Soal -->
+                <p id="question-text" class="text-lg md:text-xl font-bold text-slate-800 leading-relaxed mb-6">
+                    Memuat soal...
+                </p>
+
+                <!-- Pilihan Jawaban -->
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                    <!-- Diri secara dinamis via JS -->
+                </div>
+
+                <!-- Feedback Langsung (Benar / Salah & Pembahasan) -->
+                <div id="feedback-box" class="hidden rounded-xl p-5 border text-sm space-y-2">
+                    <div id="feedback-status" class="font-extrabold text-base flex items-center gap-2">
+                        <!-- Icon & Pesan Benar/Salah -->
+                    </div>
+                    <div id="feedback-explanation" class="text-slate-700 leading-relaxed pt-1 border-t border-slate-200/50">
+                        <!-- Pembahasan Detail -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol Navigasi Bawah -->
+            <div class="flex justify-between items-center gap-4">
+                <button id="prev-btn" onclick="navigateQuestion(-1)" class="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold px-5 py-2.5 rounded-xl text-sm shadow-sm transition-all flex items-center gap-2">
+                    ← Sebelumnya
+                </button>
+
+                <button id="finish-btn" onclick="showResultsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-2.5 rounded-xl text-sm shadow-sm transition-all">
+                    Selesaikan Kuis
+                </button>
+
+                <button id="next-btn" onclick="navigateQuestion(1)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-sm transition-all flex items-center gap-2">
+                    Berikutnya →
+                </button>
+            </div>
+
+        </section>
+
+        <!-- Sidebar Grid Navigasi Soal (Lebar 1 Kolom) -->
+        <aside class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 h-fit space-y-4">
+            <h3 class="font-extrabold text-slate-800 text-base border-b pb-3">Peta Soal</h3>
+            
+            <div id="nav-grid" class="grid grid-cols-5 gap-2">
+                <!-- Tombol 1-30 dibuat via JS -->
+            </div>
+
+            <!-- Keterangan Warna Grid -->
+            <div class="border-t pt-4 text-xs space-y-2 text-slate-600 font-medium">
+                <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded-md bg-indigo-600 border border-indigo-700 inline-block"></span>
+                    <span>Sedang Dilihat</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded-md bg-emerald-100 border border-emerald-400 text-emerald-700 inline-block text-center text-[10px] font-bold">✓</span>
+                    <span>Sudah Dijawab</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded-md bg-slate-100 border border-slate-300 inline-block"></span>
+                    <span>Belum Dijawab</span>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Modal Ringkasan Hasil Kuis -->
+    <div id="result-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl text-center space-y-6 animate-bounce-in">
+            <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-4xl">
+                🏆
+            </div>
+
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-800">Hasil Kuis KUKABATAKU</h2>
+                <p class="text-slate-500 text-sm mt-1">Kerja bagus! Berikut perolehan nilaimu:</p>
+            </div>
+
+            <!-- Card Perolehan Skor -->
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 grid grid-cols-3 gap-2">
+                <div>
+                    <span class="text-xs text-slate-500 font-medium block">Total Soal</span>
+                    <span class="text-xl font-bold text-slate-800">30</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-500 font-medium block">Jawaban Benar</span>
+                    <span id="modal-correct" class="text-xl font-bold text-emerald-600">0</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-500 font-medium block">Nilai Akhir</span>
+                    <span id="modal-score" class="text-2xl font-extrabold text-indigo-600">0</span>
+                </div>
+            </div>
+
+            <p id="modal-eval" class="text-sm font-semibold text-slate-700 italic">
+                <!-- Evaluasi/Apresiasi singkat -->
+            </p>
+
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl text-sm transition-all">
+                    Tutup & Periksa Pembahasan
+                </button>
+                <button onclick="resetQuiz()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md">
+                    Coba Ulang Kuis
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Soal Lengkap (30 Soal dengan Angka Hingga 100.000, Variatif & Tersebar Kunci Jawabannya)
+        const quizData = [
+            {
+                id: 1,
+                question: "Hitunglah hasil dari: 43.250 + 12.500 × 3",
+                options: ["80.750", "167.250", "98.750", "75.250"],
+                correct: 0, // A
+                explanation: "Gunakan aturan KUKABATAKU. Perkalian dikerjakan terlebih dahulu: 12.500 × 3 = 37.500. Kemudian lakukan penjumlahan: 43.250 + 37.500 = 80.750."
+            },
+            {
+                id: 2,
+                question: "Hitunglah hasil dari: (75.800 - 23.400) ÷ 4",
+                options: ["18.950", "13.100", "69.950", "52.400"],
+                correct: 1, // B
+                explanation: "Kerjakan operasi di dalam kurung terlebih dahulu: 75.800 - 23.400 = 52.400. Lalu bagi dengan 4: 52.400 ÷ 4 = 13.100."
+            },
+            {
+                id: 3,
+                question: "Hitunglah hasil dari: 90.000 ÷ 15 + 4.850",
+                options: ["10.850", "6.000", "10.150", "11.200"],
+                correct: 0, // A
+                explanation: "Pembagian dilakukan lebih dahulu daripada penjumlahan: 90.000 ÷ 15 = 6.000. Setelah itu tambahkan: 6.000 + 4.850 = 10.850."
+            },
+            {
+                id: 4,
+                question: "Hitunglah hasil dari: 65.000 - 8.200 × 5",
+                options: ["284.000", "32.000", "24.000", "18.000"],
+                correct: 2, // C
+                explanation: "Dahulukan perkalian: 8.200 × 5 = 41.000. Kemudian lakukan pengurangan: 65.000 - 41.000 = 24.000."
+            },
+            {
+                id: 5,
+                question: "Hitunglah hasil dari: 36.400 + 48.600 ÷ 6",
+                options: ["14.166", "44.500", "42.500", "85.000"],
+                correct: 1, // B
+                explanation: "Kerjakan pembagian terlebih dahulu: 48.600 ÷ 6 = 8.100. Lalu jumlahkan: 36.400 + 8.100 = 44.500."
+            },
+            {
+                id: 6,
+                question: "Hitunglah hasil dari: 85.000 - (18.300 + 24.700)",
+                options: ["42.000", "91.400", "38.000", "41.600"],
+                correct: 0, // A
+                explanation: "Selesaikan operasi di dalam tanda kurung terlebih dahulu: 18.300 + 24.700 = 43.000. Selanjutnya kurangkan dari 85.000: 85.000 - 43.000 = 42.000."
+            },
+            {
+                id: 7,
+                question: "Hitunglah hasil dari: 14.500 × 4 ÷ 2",
+                options: ["14.500", "58.000", "29.000", "32.000"],
+                correct: 2, // C
+                explanation: "Perkalian dan pembagian sejajar, jadi kerjakan dari kiri ke kanan: 14.500 × 4 = 58.000. Kemudian bagi 2: 58.000 ÷ 2 = 29.000."
+            },
+            {
+                id: 8,
+                question: "Hitunglah hasil dari: (38.500 + 17.500) × 12",
+                options: ["672.000", "248.500", "560.000", "210.000"],
+                correct: 0, // A
+                explanation: "Operasi kurung harus didahulukan: 38.500 + 17.500 = 56.000. Kemudian kalikan dengan 12: 56.000 × 12 = 672.000."
+            },
+            {
+                id: 9,
+                question: "Hitunglah hasil dari: 72.000 ÷ (24 - 18)",
+                options: ["12.000", "3.000", "4.000", "18.000"],
+                correct: 0, // A
+                explanation: "Kerjakan yang ada di dalam tanda kurung terlebih dahulu: 24 - 18 = 6. Kemudian bagi: 72.000 ÷ 6 = 12.000."
+            },
+            {
+                id: 10,
+                question: "Hitunglah hasil dari: 50.000 + 25.000 ÷ 5 - 12.000",
+                options: ["43.000", "3.000", "53.000", "48.000"],
+                correct: 0, // A
+                explanation: "Kerjakan pembagian dulu: 25.000 ÷ 5 = 5.000. Kalimat berubah menjadi: 50.000 + 5.000 - 12.000. Hitung berurutan dari kiri: 55.000 - 12.000 = 43.000."
+            },
+            {
+                id: 11,
+                question: "Sebuah toko pakaian membeli 8 kodi baju kaos seharga Rp 12.500 per helai. Toko tersebut kemudian mendapat potongan harga total sebesar Rp 15.000. Berapa total harga yang dibayar? (Catatan: 1 kodi = 20 helai)",
+                options: ["Rp 1.985.000", "Rp 1.850.000", "Rp 2.015.000", "Rp 1.900.000"],
+                correct: 0, // A
+                explanation: "Jumlah helai baju = 8 × 20 = 160 helai. Kalimat matematikanya: (160 × 12.500) - 15.000 = 2.000.000 - 15.000 = Rp 1.985.000."
+            },
+            {
+                id: 12,
+                question: "Hitunglah hasil dari: 95.000 - 35.000 ÷ 7 × 4",
+                options: ["75.000", "34.285", "115.000", "80.000"],
+                correct: 0, // A
+                explanation: "Pembagian dan perkalian sejajar, kerjakan dari kiri: 35.000 ÷ 7 = 5.000, lalu 5.000 × 4 = 20.000. Terakhir kurangkan: 95.000 - 20.000 = 75.000."
+            },
+            {
+                id: 13,
+                question: "Pak Budi membagikan bantuan 60.000 kg beras ke 12 desa secara merata. Setiap desa memberikan lagi bantuan sisa dari warga sebanyak 1.500 kg. Berapa total beras di tiap desa?",
+                options: ["6.500 kg", "5.000 kg", "7.500 kg", "8.000 kg"],
+                correct: 0, // A
+                explanation: "Bentuk matematikanya: (60.000 ÷ 12) + 1.500 = 5.000 + 1.500 = 6.500 kg."
+            },
+            {
+                id: 14,
+                question: "Hitunglah hasil dari: 48.000 ÷ 8 + 15.000 × 3",
+                options: ["51.000", "63.000", "45.000", "21.000"],
+                correct: 0, // A
+                explanation: "Kerjakan pembagian dan perkalian terpisah lebih dulu: 48.000 ÷ 8 = 6.000 dan 15.000 × 3 = 45.000. Kemudian jumlahkan: 6.000 + 45.000 = 51.000."
+            },
+            {
+                id: 15,
+                question: "Hitunglah hasil dari: (64.000 + 16.000) ÷ (25 - 5)",
+                options: ["4.000", "3.200", "5.000", "2.500"],
+                correct: 0, // A
+                explanation: "Selesaikan kedua tanda kurung terlebih dahulu: (64.000 + 16.000) = 80.000 dan (25 - 5) = 20. Bagi hasilnya: 80.000 ÷ 20 = 4.000."
+            },
+            {
+                id: 16,
+                question: "Hitunglah hasil dari: 82.500 - 12.500 × 4 + 18.000",
+                options: ["50.500", "298.000", "58.000", "88.000"],
+                correct: 0, // A
+                explanation: "Dahulukan perkalian: 12.500 × 4 = 50.000. Kalimat menjadi: 82.500 - 50.000 + 18.000 = 32.500 + 18.000 = 50.500."
+            },
+            {
+                id: 17,
+                question: "Hitunglah hasil dari: 100.000 - (45.000 ÷ 9 + 32.000)",
+                options: ["63.000", "37.000", "58.000", "23.000"],
+                correct: 0, // A
+                explanation: "Di dalam kurung, kerjakan pembagian dulu: 45.000 ÷ 9 = 5.000. Lalu tambahkan: 5.000 + 32.000 = 37.000. Kurangkan dari 100.000: 100.000 - 37.000 = 63.000."
+            },
+            {
+                id: 18,
+                question: "Panitia sekolah memiliki dana Rp 85.000. Mereka membeli 5 pax kertas asturo seharga Rp 11.200 per pax. Berapa sisa uang dana panitia?",
+                options: ["Rp 29.000", "Rp 56.000", "Rp 32.000", "Rp 24.000"],
+                correct: 0, // A
+                explanation: "Bentuk matematikanya: 85.000 - (5 × 11.200) = 85.000 - 56.000 = Rp 29.000."
+            },
+            {
+                id: 19,
+                question: "Hitunglah hasil dari: 54.000 ÷ 9 × 8 - 18.000",
+                options: ["30.000", "22.000", "12.000", "48.000"],
+                correct: 0, // A
+                explanation: "Kerjakan dari kiri ke kanan untuk pembagian & perkalian: 54.000 ÷ 9 = 6.000. Kemudian 6.000 × 8 = 48.000. Terakhir kurangkan: 48.000 - 18.000 = 30.000."
+            },
+            {
+                id: 20,
+                question: "Hitunglah hasil dari: 27.500 + (60.000 - 15.000) ÷ 5",
+                options: ["36.500", "16.500", "42.000", "33.500"],
+                correct: 0, // A
+                explanation: "Selesaikan operasi di dalam kurung dahulu: 60.000 - 15.000 = 45.000. Lalu bagi dengan 5: 45.000 ÷ 5 = 9.000. Jumlahkan: 27.500 + 9.000 = 36.500."
+            },
+            {
+                id: 21,
+                question: "Hitunglah hasil dari: 42.000 + 18.000 ÷ 3 - 8.500",
+                options: ["39.500", "11.500", "31.500", "28.000"],
+                correct: 0, // A
+                explanation: "Kerjakan pembagian dulu: 18.000 ÷ 3 = 6.000. Kalimat menjadi: 42.000 + 6.000 - 8.500 = 48.000 - 8.500 = 39.500."
+            },
+            {
+                id: 22,
+                question: "Hitunglah hasil dari: (90.000 - 18.000) ÷ 8 + 14.500",
+                options: ["23.500", "19.000", "21.500", "25.000"],
+                correct: 0, // A
+                explanation: "Kerjakan tanda kurung dulu: 90.000 - 18.000 = 72.000. Lalu bagi 8: 72.000 ÷ 8 = 9.000. Jumlahkan: 9.000 + 14.500 = 23.500."
+            },
+            {
+                id: 23,
+                question: "Sebuah pabrik memproduksi 15.000 pasang sepatu sehari selama 5 hari. Seluruh sepatu dibagikan sama banyak ke 25 toko cabang. Berapa pasang sepatu yang diterima masing-masing toko?",
+                options: ["3.000 pasang", "2.500 pasang", "4.000 pasang", "3.500 pasang"],
+                correct: 0, // A
+                explanation: "Bentuk matematikanya: (15.000 × 5) ÷ 25 = 75.000 ÷ 25 = 3.000 pasang sepatu."
+            },
+            {
+                id: 24,
+                question: "Hitunglah hasil dari: 70.000 - 12.000 × 3 ÷ 6",
+                options: ["64.000", "29.000", "58.000", "66.000"],
+                correct: 0, // A
+                explanation: "Dahulukan perkalian dan pembagian dari kiri: 12.000 × 3 = 36.000, lalu 36.000 ÷ 6 = 6.000. Kurangkan dari 70.000: 70.000 - 6.000 = 64.000."
+            },
+            {
+                id: 25,
+                question: "Hitunglah hasil dari: 33.000 + 17.000 × (15 - 11)",
+                options: ["101.000", "200.000", "85.000", "68.000"],
+                correct: 0, // A
+                explanation: "Kerjakan kurung dulu: 15 - 11 = 4. Lalu perkalian: 17.000 × 4 = 68.000. Jumlahkan: 33.000 + 68.000 = 101.000."
+            },
+            {
+                id: 26,
+                question: "Hitunglah hasil dari: 80.000 ÷ 16 + 24.000 ÷ 8",
+                options: ["8.000", "6.500", "5.000", "12.000"],
+                correct: 0, // A
+                explanation: "Kerjakan kedua pembagian terpisah lebih dulu: 80.000 ÷ 16 = 5.000 dan 24.000 ÷ 8 = 3.000. Tambahkan: 5.000 + 3.000 = 8.000."
+            },
+            {
+                id: 27,
+                question: "Koperasi sekolah mempunyai persediaan 40.000 buku. Sebanyak 5 distributor masing-masing memasok tambahan 8.500 buku. Berapa total buku di koperasi sekarang?",
+                options: ["82.500 buku", "72.500 buku", "92.500 buku", "80.000 buku"],
+                correct: 0, // A
+                explanation: "Bentuk matematikanya: 40.000 + (5 × 8.500) = 40.000 + 42.500 = 82.500 buku."
+            },
+            {
+                id: 28,
+                question: "Hitunglah hasil dari: 100.000 - 80.000 ÷ (8 + 12)",
+                options: ["96.000", "1.000", "94.000", "85.000"],
+                correct: 0, // A
+                explanation: "Selesaikan kurung dulu: 8 + 12 = 20. Lalu pembagian: 80.000 ÷ 20 = 4.000. Kurangkan: 100.000 - 4.000 = 96.000."
+            },
+            {
+                id: 29,
+                question: "Hitunglah hasil dari: 62.500 + 12.500 ÷ 5 × 3",
+                options: ["70.000", "45.000", "65.000", "72.500"],
+                correct: 0, // A
+                explanation: "Kerjakan pembagian dulu: 12.500 ÷ 5 = 2.500. Lalu perkalian: 2.500 × 3 = 7.500. Jumlahkan: 62.500 + 7.500 = 70.000."
+            },
+            {
+                id: 30,
+                question: "Hitunglah hasil dari: (45.000 + 35.000) - 15.000 × 4",
+                options: ["20.000", "260.000", "40.000", "10.000"],
+                correct: 0, // A
+                explanation: "Selesaikan tanda kurung dulu: 45.000 + 35.000 = 80.000. Lalu kalikan: 15.000 × 4 = 60.000. Kurangkan: 80.000 - 60.000 = 20.000."
+            }
+        ];
+
+        // Pengacakan Posisi Pilihan Jawaban Secara Dinamis (Menjaga Distribusi Kunci Jawaban Seimbang)
+        // Agar posisi jawaban benar tersebar secara adil di A, B, C, D tanpa mengubah kebenaran data
+        const targetDistribution = [0,1,2,3, 1,2,3,0, 2,3,0,1, 3,0,1,2, 0,2,1,3, 3,1,0,2, 1,3,2,0, 2,0];
+        
+        quizData.forEach((q, idx) => {
+            const originalCorrectText = q.options[q.correct];
+            const desiredIndex = targetDistribution[idx % targetDistribution.length];
+            
+            if (desiredIndex !== q.correct) {
+                // Tukar elemen
+                const temp = q.options[desiredIndex];
+                q.options[desiredIndex] = originalCorrectText;
+                q.options[q.correct] = temp;
+                q.correct = desiredIndex;
+            }
+        });
+
+        // State Aplikasi
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // Simpan { questionId: selectedOptionIndex }
+
+        // Element Referensi
+        const questionTextEl = document.getElementById("question-text");
+        const optionsContainerEl = document.getElementById("options-container");
+        const questionBadgeEl = document.getElementById("question-badge");
+        const statusBadgeEl = document.getElementById("status-badge");
+        const progressTextEl = document.getElementById("progress-text");
+        const feedbackBoxEl = document.getElementById("feedback-box");
+        const feedbackStatusEl = document.getElementById("feedback-status");
+        const feedbackExplanationEl = document.getElementById("feedback-explanation");
+        const navGridEl = document.getElementById("nav-grid");
+        const prevBtn = document.getElementById("prev-btn");
+        const nextBtn = document.getElementById("next-btn");
+
+        // Inisialisasi Kuis Saat Halaman Dimuat
+        window.addEventListener("DOMContentLoaded", () => {
+            loadFromLocalStorage();
+            renderNavGrid();
+            displayQuestion(currentQuestionIndex);
+            updateProgress();
+        });
+
+        // Menyimpan status ke LocalStorage
+        function saveToLocalStorage() {
+            localStorage.setItem("kukabataku_user_answers", JSON.stringify(userAnswers));
+            localStorage.setItem("kukabataku_current_index", currentQuestionIndex);
+        }
+
+        // Memuat dari LocalStorage
+        function loadFromLocalStorage() {
+            const savedAnswers = localStorage.getItem("kukabataku_user_answers");
+            const savedIndex = localStorage.getItem("kukabataku_current_index");
+
+            if (savedAnswers) {
+                userAnswers = JSON.parse(savedAnswers);
+            }
+            if (savedIndex !== null) {
+                currentQuestionIndex = parseInt(savedIndex, 10) || 0;
+            }
+        }
+
+        // Render Sidebar Peta Soal
+        function renderNavGrid() {
+            navGridEl.innerHTML = "";
+            quizData.forEach((q, idx) => {
+                const btn = document.createElement("button");
+                btn.id = `nav-grid-${idx}`;
+                btn.innerText = idx + 1;
+                btn.className = getNavBtnClass(idx);
+                btn.onclick = () => jumpToQuestion(idx);
+                navGridEl.appendChild(btn);
+            });
+        }
+
+        // Penentuan Style Warna Tombol Navigasi Grid
+        function getNavBtnClass(idx) {
+            const isCurrent = idx === currentQuestionIndex;
+            const isAnswered = userAnswers[quizData[idx].id] !== undefined;
+
+            let base = "w-full aspect-square rounded-xl text-xs font-bold transition-all flex items-center justify-center border ";
+
+            if (isCurrent) {
+                return base + "bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-400 font-extrabold shadow-sm";
+            } else if (isAnswered) {
+                return base + "bg-emerald-100 text-emerald-800 border-emerald-300 font-bold";
+            } else {
+                return base + "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+            }
+        }
+
+        // Tampilkan Soal Berdasarkan Index
+        function displayQuestion(index) {
+            currentQuestionIndex = index;
+            saveToLocalStorage();
+
+            const data = quizData[index];
+            const answeredOption = userAnswers[data.id];
+
+            // Update Badge & Header Soal
+            questionBadgeEl.innerText = `Soal Nomor ${index + 1}`;
+            questionTextEl.innerText = data.question;
+
+            if (answeredOption !== undefined) {
+                statusBadgeEl.innerText = "Sudah Dijawab";
+                statusBadgeEl.className = "text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-md";
+            } else {
+                statusBadgeEl.innerText = "Belum Dijawab";
+                statusBadgeEl.className = "text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-md";
+            }
+
+            // Render Pilihan Jawaban
+            optionsContainerEl.innerHTML = "";
+            const labels = ["A", "B", "C", "D"];
+
+            data.options.forEach((optText, optIdx) => {
+                const button = document.createElement("button");
+                button.className = getOptionBtnClass(data, optIdx, answeredOption);
+                button.disabled = answeredOption !== undefined; // Kunci jika sudah dijawab
+                button.onclick = () => handleAnswer(data.id, optIdx);
+
+                button.innerHTML = `
+                    <div class="flex items-center gap-3 w-full">
+                        <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            ${labels[optIdx]}
+                        </span>
+                        <span class="text-slate-800 font-medium text-left text-sm md:text-base">${optText}</span>
+                    </div>
+                `;
+
+                optionsContainerEl.appendChild(button);
+            });
+
+            // Tampilkan Feedback jika sudah dijawab
+            if (answeredOption !== undefined) {
+                showFeedback(data, answeredOption);
+            } else {
+                feedbackBoxEl.classList.add("hidden");
+            }
+
+            // Update Status Tombol Navigasi
+            prevBtn.disabled = index === 0;
+            prevBtn.style.opacity = index === 0 ? "0.5" : "1";
+
+            nextBtn.disabled = index === quizData.length - 1;
+            nextBtn.style.opacity = index === quizData.length - 1 ? "0.5" : "1";
+
+            // Refresh tampilan Peta Navigasi
+            renderNavGrid();
+        }
+
+        // Style Tombol Pilihan Jawaban
+        function getOptionBtnClass(data, optIdx, answeredOption) {
+            let base = "option-btn group w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ";
+
+            if (answeredOption === undefined) {
+                return base + "bg-white border-slate-200 hover:border-indigo-400 hover:shadow-sm";
+            }
+
+            // Jika sudah dijawab, berikan warna indikator Benar/Salah
+            if (optIdx === data.correct) {
+                return base + "bg-emerald-50 border-emerald-500 ring-2 ring-emerald-300 font-bold";
+            } else if (optIdx === answeredOption) {
+                return base + "bg-rose-50 border-rose-400 ring-2 ring-rose-200 opacity-90";
+            } else {
+                return base + "bg-slate-50 border-slate-200 opacity-50";
+            }
+        }
+
+        // Eksekusi Saat Siswa Menjawab Soal
+        function handleAnswer(questionId, selectedOptIndex) {
+            userAnswers[questionId] = selectedOptIndex;
+            saveToLocalStorage();
+            updateProgress();
+            displayQuestion(currentQuestionIndex);
+        }
+
+        // Tampilkan Feedback Langsung setelah Dijawab
+        function showFeedback(data, selectedOptIndex) {
+            const isCorrect = selectedOptIndex === data.correct;
+
+            feedbackBoxEl.classList.remove("hidden");
+
+            if (isCorrect) {
+                feedbackBoxEl.className = "rounded-xl p-5 border text-sm space-y-2 bg-emerald-50 border-emerald-200 text-emerald-900";
+                feedbackStatusEl.innerHTML = `<span class="text-xl">✅</span><span class="text-emerald-700">Jawabanmu Tepat Sekali!</span>`;
+            } else {
+                feedbackBoxEl.className = "rounded-xl p-5 border text-sm space-y-2 bg-rose-50 border-rose-200 text-rose-900";
+                feedbackStatusEl.innerHTML = `<span class="text-xl">❌</span><span class="text-rose-700">Jawaban Kurang Tepat</span>`;
+            }
+
+            feedbackExplanationEl.innerHTML = `<strong>Pembahasan:</strong> ${data.explanation}`;
+        }
+
+        // Navigasi Pindah Soal (Sebelumnya / Berikutnya)
+        function navigateQuestion(step) {
+            const newIndex = currentQuestionIndex + step;
+            if (newIndex >= 0 && newIndex < quizData.length) {
+                displayQuestion(newIndex);
+            }
+        }
+
+        // Pindah Soal Langsung dari Peta Soal Sidebar
+        function jumpToQuestion(index) {
+            displayQuestion(index);
+        }
+
+        // Update Counter Progress Menjawab
+        function updateProgress() {
+            const count = Object.keys(userAnswers).length;
+            progressTextEl.innerText = `${count} / ${quizData.length}`;
+        }
+
+        // Tampilkan Modal Hasil Akhir Kuis
+        function showResultsModal() {
+            let correctCount = 0;
+
+            quizData.forEach(q => {
+                if (userAnswers[q.id] === q.correct) {
+                    correctCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / quizData.length) * 100);
+
+            document.getElementById("modal-correct").innerText = `${correctCount} / ${quizData.length}`;
+            document.getElementById("modal-score").innerText = score;
+
+            const evalText = document.getElementById("modal-eval");
+            if (score === 100) {
+                evalText.innerText = "Sempurna! Kamu adalah Master KUKABATAKU Sejati! 🌟";
+            } else if (score >= 80) {
+                evalText.innerText = "Luar biasa! Pemahaman aturan hitung campuranmu sudah sangat hebat! 👍";
+            } else if (score >= 60) {
+                evalText.innerText = "Bagus! Terus tingkatkan ketelitianmu dalam menghitung angka ribuan! 💪";
+            } else {
+                evalText.innerText = "Jangan berkecil hati. Pelajari kembali pembahasannya dan coba lagi ya! 📚";
+            }
+
+            document.getElementById("result-modal").classList.remove("hidden");
+        }
+
+        // Tutup Modal Ringkasan
+        function closeModal() {
+            document.getElementById("result-modal").classList.add("hidden");
+        }
+
+        // Konfirmasi Reset Ulang Kuis
+        function resetQuizConfirm() {
+            if (confirm("Apakah kamu yakin ingin mengulang kuis dari awal? Semua jawaban tersimpan akan dihapus.")) {
+                resetQuiz();
+            }
+        }
+
+        // Reset Total Data Kuis
+        function resetQuiz() {
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            localStorage.removeItem("kukabataku_user_answers");
+            localStorage.removeItem("kukabataku_current_index");
+            closeModal();
+            updateProgress();
+            renderNavGrid();
+            displayQuestion(0);
+        }
+    </script>
+</body>
+</html>
